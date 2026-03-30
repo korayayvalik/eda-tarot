@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function getCardImage(cardId: number) {
   return `/cards/front/${cardId}.jpeg`;
 }
 
-export default function AcPage() {
+function AcPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -119,61 +119,17 @@ export default function AcPage() {
                     transform: "rotateY(180deg)",
                     backfaceVisibility: "hidden",
                     border: "2px solid rgba(255,215,150,0.4)",
-                    boxShadow: isOpen
-                      ? "0 0 25px rgba(255,215,120,0.5), 0 0 60px rgba(180,100,255,0.4)"
-                      : "none",
                   }}
                 >
-                  <div
+                  <img
+                    src={getCardImage(cardId)}
+                    alt={`Kart ${cardId}`}
                     style={{
-                      position: "absolute",
-                      inset: 0,
-                      padding: "3px",
-                      borderRadius: "20px",
-                      background:
-                        "linear-gradient(135deg, gold, #ffb3ff, gold)",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
                     }}
-                  >
-                    <div
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: "14px",
-                        overflow: "hidden",
-                        position: "relative",
-                        background: "#120b1d",
-                      }}
-                    >
-                      <img
-                        src={getCardImage(cardId)}
-                        alt={`Kart ${cardId}`}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          objectPosition: "center",
-                          transform: "scale(1.12)",
-                          display: "block",
-                        }}
-                      />
-
-                      {isOpen && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            left: "-100%",
-                            width: "60%",
-                            height: "100%",
-                            background:
-                              "linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent)",
-                            transform: "skewX(-20deg)",
-                            animation: "shine 1.2s forwards",
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
+                  />
                 </div>
               </div>
             </div>
@@ -181,88 +137,38 @@ export default function AcPage() {
         })}
       </div>
 
-      {/* FULLSCREEN BÜYÜYEN KART */}
+      {/* FULLSCREEN */}
       {expandedCard !== null && (
         <div
           onClick={() => setExpandedCard(null)}
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.82)",
+            background: "rgba(0,0,0,0.85)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             zIndex: 9999,
-            padding: "20px",
-            cursor: "pointer",
           }}
         >
-          <div
+          <img
+            src={getCardImage(selectedCards[expandedCard])}
             style={{
-              width: "min(92vw, 520px)",
-              aspectRatio: "7/12",
-              borderRadius: "24px",
-              overflow: "hidden",
-              border: "3px solid rgba(255,215,150,0.55)",
-              boxShadow:
-                "0 0 35px rgba(255,215,120,0.45), 0 0 70px rgba(180,100,255,0.35)",
-              background:
-                "linear-gradient(135deg, rgba(255,220,150,0.25), rgba(180,100,255,0.18))",
-              padding: "4px",
+              width: "90vw",
+              maxWidth: "500px",
+              borderRadius: "20px",
             }}
-          >
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "20px",
-                overflow: "hidden",
-                background: "#120b1d",
-              }}
-            >
-              <img
-                src={getCardImage(selectedCards[expandedCard])}
-                alt={`Kart ${selectedCards[expandedCard]}`}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  objectPosition: "center",
-                  display: "block",
-                }}
-              />
-            </div>
-          </div>
+          />
         </div>
       )}
-
-      {/* BUTTON */}
-      <div style={{ textAlign: "center", marginTop: "40px" }}>
-        <button
-          onClick={() => router.push("/")}
-          style={{
-            padding: "14px 24px",
-            borderRadius: "12px",
-            background: "linear-gradient(135deg, #b14cff, #7a2ad3)",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Baştan Başla
-        </button>
-      </div>
-
-      <style jsx>{`
-        @keyframes shine {
-          0% {
-            left: -100%;
-          }
-          100% {
-            left: 150%;
-          }
-        }
-      `}</style>
     </main>
+  );
+}
+
+export default function AcPage() {
+  return (
+    <Suspense fallback={<div style={{ color: "white" }}>Yükleniyor...</div>}>
+      <AcPageContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function shuffleArray<T>(array: T[]) {
@@ -12,7 +12,7 @@ function shuffleArray<T>(array: T[]) {
   return arr;
 }
 
-export default function FalPage() {
+function FalPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const countParam = searchParams.get("count");
@@ -243,5 +243,13 @@ export default function FalPage() {
         </button>
       </div>
     </main>
+  );
+}
+
+export default function FalPage() {
+  return (
+    <Suspense fallback={<div style={{ color: "white", padding: "40px" }}>Yükleniyor...</div>}>
+      <FalPageContent />
+    </Suspense>
   );
 }
