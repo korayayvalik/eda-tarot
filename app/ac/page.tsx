@@ -15,13 +15,18 @@ function AcPageContent() {
 
   const selectedCards = useMemo(() => {
     if (!cardsParam) return [];
-    return cardsParam.split(",").map(Number);
+    return cardsParam
+      .split(",")
+      .map((v) => Number(v))
+      .filter((v) => !Number.isNaN(v));
   }, [cardsParam]);
 
   const [openedCount, setOpenedCount] = useState(0);
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
 
   useEffect(() => {
+    if (selectedCards.length === 0) return;
+
     let i = 0;
     const interval = setInterval(() => {
       i++;
@@ -34,12 +39,7 @@ function AcPageContent() {
 
   function toggleExpanded(index: number, isOpen: boolean) {
     if (!isOpen) return;
-
-    if (expandedCard === index) {
-      setExpandedCard(null);
-    } else {
-      setExpandedCard(index);
-    }
+    setExpandedCard((prev) => (prev === index ? null : index));
   }
 
   return (
@@ -53,11 +53,24 @@ function AcPageContent() {
         fontFamily: "serif",
       }}
     >
-      <h1 style={{ textAlign: "center", fontSize: "42px" }}>
+      <h1
+        style={{
+          textAlign: "center",
+          fontSize: "42px",
+          marginBottom: "10px",
+        }}
+      >
         Kartların Açıldı ✨
       </h1>
 
-      <p style={{ textAlign: "center", marginBottom: "30px" }}>
+      <p
+        style={{
+          textAlign: "center",
+          marginBottom: "30px",
+          fontSize: "18px",
+          color: "#ead6ff",
+        }}
+      >
         Açılan kart: {openedCount}/{selectedCards.length}
       </p>
 
@@ -66,6 +79,7 @@ function AcPageContent() {
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(180px,1fr))",
           gap: "25px",
+          alignItems: "start",
         }}
       >
         {selectedCards.map((cardId, index) => {
@@ -96,6 +110,8 @@ function AcPageContent() {
                     overflow: "hidden",
                     backfaceVisibility: "hidden",
                     border: "2px solid rgba(255,255,255,0.15)",
+                    boxShadow: "0 0 10px rgba(0,0,0,0.25)",
+                    background: "black",
                   }}
                 >
                   <img
@@ -105,6 +121,7 @@ function AcPageContent() {
                       width: "100%",
                       height: "100%",
                       objectFit: "cover",
+                      display: "block",
                     }}
                   />
                 </div>
@@ -119,17 +136,63 @@ function AcPageContent() {
                     transform: "rotateY(180deg)",
                     backfaceVisibility: "hidden",
                     border: "2px solid rgba(255,215,150,0.4)",
+                    boxShadow: isOpen
+                      ? "0 0 25px rgba(255,215,120,0.5), 0 0 60px rgba(180,100,255,0.4)"
+                      : "none",
                   }}
                 >
-                  <img
-                    src={getCardImage(cardId)}
-                    alt={`Kart ${cardId}`}
+                  <div
                     style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
+                      position: "absolute",
+                      inset: 0,
+                      padding: "3px",
+                      borderRadius: "20px",
+                      background:
+                        "linear-gradient(135deg, gold, #ffb3ff, gold)",
                     }}
-                  />
+                  >
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: "14px",
+                        overflow: "hidden",
+                        position: "relative",
+                        background: "#120b1d",
+                      }}
+                    >
+                      <img
+                        src={getCardImage(cardId)}
+                        alt={`Kart ${cardId}`}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          objectPosition: "center",
+                          transform: "scale(1.12)",
+                          transformOrigin: "center center",
+                          display: "block",
+                        }}
+                      />
+
+                      {isOpen && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: "-100%",
+                            width: "60%",
+                            height: "100%",
+                            background:
+                              "linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent)",
+                            transform: "skewX(-20deg)",
+                            animation: "shine 1.2s forwards",
+                            pointerEvents: "none",
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -137,37 +200,113 @@ function AcPageContent() {
         })}
       </div>
 
-      {/* FULLSCREEN */}
-      {expandedCard !== null && (
+      {expandedCard !== null && selectedCards[expandedCard] !== undefined && (
         <div
           onClick={() => setExpandedCard(null)}
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.85)",
+            background: "rgba(0,0,0,0.82)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             zIndex: 9999,
+            padding: "20px",
+            cursor: "pointer",
           }}
         >
-          <img
-            src={getCardImage(selectedCards[expandedCard])}
+          <div
             style={{
-              width: "90vw",
-              maxWidth: "500px",
-              borderRadius: "20px",
+              width: "min(92vw, 520px)",
+              aspectRatio: "7/12",
+              borderRadius: "24px",
+              overflow: "hidden",
+              border: "3px solid rgba(255,215,150,0.55)",
+              boxShadow:
+                "0 0 35px rgba(255,215,120,0.45), 0 0 70px rgba(180,100,255,0.35)",
+              background:
+                "linear-gradient(135deg, rgba(255,220,150,0.25), rgba(180,100,255,0.18))",
+              padding: "4px",
             }}
-          />
+          >
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: "20px",
+                overflow: "hidden",
+                background: "#120b1d",
+              }}
+            >
+              <img
+                src={getCardImage(selectedCards[expandedCard])}
+                alt={`Kart ${selectedCards[expandedCard]}`}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "center",
+                  display: "block",
+                }}
+              />
+            </div>
+          </div>
         </div>
       )}
+
+      <div style={{ textAlign: "center", marginTop: "40px" }}>
+        <button
+          onClick={() => router.push("/")}
+          style={{
+            padding: "14px 24px",
+            borderRadius: "12px",
+            background: "linear-gradient(135deg, #b14cff, #7a2ad3)",
+            color: "white",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: 600,
+            boxShadow: "0 0 18px rgba(176, 76, 255, 0.35)",
+          }}
+        >
+          Baştan Başla
+        </button>
+      </div>
+
+      <style jsx>{`
+        @keyframes shine {
+          0% {
+            left: -100%;
+          }
+          100% {
+            left: 150%;
+          }
+        }
+      `}</style>
     </main>
   );
 }
 
 export default function AcPage() {
   return (
-    <Suspense fallback={<div style={{ color: "white" }}>Yükleniyor...</div>}>
+    <Suspense
+      fallback={
+        <div
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background:
+              "radial-gradient(circle at center, #3a1466 0%, #14071f 40%, black 100%)",
+            color: "white",
+            fontFamily: "serif",
+          }}
+        >
+          Yükleniyor...
+        </div>
+      }
+    >
       <AcPageContent />
     </Suspense>
   );
